@@ -3,24 +3,18 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { useId } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNotes } from "../../services/noteService";
+import { createNote } from "../../services/noteService";
 
-interface ModalPrors {
+interface NoteFormProps {
+  initialValues: NoteFormValues;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
-interface NoteFormPrors {
+export interface NoteFormValues {
   title: string;
   content?: string;
   tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
 }
-
-const initialValues: NoteFormPrors = {
-  title: "",
-  content: "",
-  tag: "Todo",
-};
 
 const NoteFormSchema = Yup.object().shape({
   title: Yup.string()
@@ -33,26 +27,24 @@ const NoteFormSchema = Yup.object().shape({
     .required("Required!"),
 });
 
-export default function NoteForm({ onClose, onSuccess }: ModalPrors) {
+export default function NoteForm({ initialValues, onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationFn: createNotes,
+    mutationFn: createNote,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["note"] });
-      onSuccess();
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onClose();
     },
   });
 
   const fieldId = useId();
 
   const handleSubmit = (
-    values: NoteFormPrors,
-    actions: FormikHelpers<NoteFormPrors>
+    values: NoteFormValues,
+    actions: FormikHelpers<NoteFormValues>
   ) => {
-    console.log(values);
     mutate(values);
-
     actions.resetForm();
   };
 
@@ -71,7 +63,11 @@ export default function NoteForm({ onClose, onSuccess }: ModalPrors) {
             name="title"
             className={css.input}
           />
-          <ErrorMessage name="title" className={css.error} />
+          <ErrorMessage
+            name="fieldTitle"
+            component="div"
+            className={css.error}
+          />
         </div>
 
         <div className={css.formGroup}>
@@ -83,7 +79,11 @@ export default function NoteForm({ onClose, onSuccess }: ModalPrors) {
             rows={8}
             className={css.textarea}
           />
-          <ErrorMessage name="content" className={css.error} />
+          <ErrorMessage
+            name="fieldContent"
+            component="div"
+            className={css.error}
+          />
         </div>
 
         <div className={css.formGroup}>
@@ -100,7 +100,7 @@ export default function NoteForm({ onClose, onSuccess }: ModalPrors) {
             <option value="Meeting">Meeting</option>
             <option value="Shopping">Shopping</option>
           </Field>
-          <ErrorMessage name="tag" className={css.error} />
+          <ErrorMessage name="fieldTag" component="div" className={css.error} />
         </div>
 
         <div className={css.actions}>

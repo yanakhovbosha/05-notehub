@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Note } from "../types/note";
+import { NoteFormValues } from "../components/NoteForm/NoteForm";
 
 export interface NoteProps {
   notes: Note[];
@@ -30,9 +31,9 @@ export const fetchNotes = async (
   return response.data;
 };
 
-export const deleteNotes = async (noteId: string) => {
-  const response = await axios.delete<NoteProps>(
-    `https://notehub-public.goit.study/api/notes/${noteId}`,
+export const deleteNote = async (id: string) => {
+  const response = await axios.delete<Note>(
+    `https://notehub-public.goit.study/api/notes/${id}`,
     {
       headers: {
         Authorization: `Bearer ${notehubKey}`,
@@ -42,16 +43,10 @@ export const deleteNotes = async (noteId: string) => {
   return response.data;
 };
 
-interface NoteFormProps {
-  title: string;
-  content?: string;
-  tag: "Todo" | "Work" | "Personal" | "Meeting" | "Shopping";
-}
-
-export const createNotes = async (newNotes: NoteFormProps) => {
-  const response = await axios.post<NoteProps>(
+export const createNote = async (createdAt: NoteFormValues): Promise<Note> => {
+  const response = await axios.post<Note>(
     "https://notehub-public.goit.study/api/notes",
-    newNotes,
+    createdAt,
     {
       headers: {
         Authorization: `Bearer ${notehubKey}`,

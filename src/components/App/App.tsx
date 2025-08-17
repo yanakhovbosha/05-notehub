@@ -1,4 +1,3 @@
-import Notelist from "../NoteList/NoteList";
 import SearchBox from "../SearchBox/SearchBox";
 import css from "./App.module.css";
 import { fetchNotes, NoteProps } from "../../services/noteService";
@@ -10,22 +9,19 @@ import { useDebouncedCallback } from "use-debounce";
 import Pagination from "../Pagination/Pagination";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import NoteList from "../NoteList/NoteList";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, isError } = useQuery<NoteProps>({
-    queryKey: ["note", searchQuery, currentPage],
+    queryKey: ["notes", searchQuery, currentPage],
     queryFn: () => fetchNotes(searchQuery, currentPage),
     placeholderData: keepPreviousData,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => setIsModalOpen(true);
-
-  const closeModal = () => setIsModalOpen(false);
 
   const handleChange = useDebouncedCallback(setSearchQuery, 300);
 
@@ -40,16 +36,23 @@ export default function App() {
             onPageChange={setCurrentPage}
           />
         )}
-        <button onClick={openModal} className={css.button}>
+        <button onClick={() => setIsModalOpen(true)} className={css.button}>
           Create note +
         </button>
       </header>
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {data?.notes && <Notelist notes={data?.notes ?? []} />}
+      {data?.notes && <NoteList notes={data?.notes ?? []} />}
       {isModalOpen && (
-        <Modal onClose={closeModal}>
-          <NoteForm onClose={closeModal} onSuccess={closeModal} />
+        <Modal onClose={() => setIsModalOpen(false)}>
+          {isModalOpen && (
+            <NoteForm
+              initialValues={{ title: "", content: "", tag: "Todo" }}
+              onClose={() => {
+                setIsModalOpen(false);
+              }}
+            />
+          )}
         </Modal>
       )}
     </div>
