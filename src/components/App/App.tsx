@@ -23,7 +23,10 @@ export default function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleChange = useDebouncedCallback(setSearchQuery, 300);
+  const handleChange = useDebouncedCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, 300);
 
   return (
     <div className={css.app}>

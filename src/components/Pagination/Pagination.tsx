@@ -12,6 +12,9 @@ export default function Pagination({
   currentPage,
   onPageChange,
 }: PaginationProps) {
+  if (totalPages < 1) {
+    return null;
+  }
   return (
     <ReactPaginate
       pageCount={totalPages}
